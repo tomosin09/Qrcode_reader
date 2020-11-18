@@ -7,30 +7,32 @@ import imutils
 import time
 
 # Initialization parameters
-logs = {}  # dict for logs
 latestCode = []  # list for latest codes
 
-# capture video from camera with class imutils by Adrian Rosebrock
-stream = VideoStream(src=0).start()
-# if stream.grabbed == 0:
-#     logs = {'WARNING': 'No connect'}
-#     print(logs)
-#     stream.stop()
 
-time.sleep(1)
-cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
+# Function to load stream
+def connect():
+    # capture video from camera with class imutils by Adrian Rosebrock
+    stream = VideoStream(src=0).start()
+    if stream.grabbed == 0:
+        print('no connect')
+    time.sleep(1)
+    cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
+    return stream
 
-# address = VideoStream('rtsp://admin:AdminNLT!1@192.168.254.18:554/ch1-s1?tcp').start()
 
-while (cv.waitKey(10) != 27):
+vs = connect()
 
+
+# Function to stop stream
+def disconnect():
+    cv.destroyAllWindows()
+    connect().stop()
+
+
+def detect():
     # grab a frame from a video stream
-    frame = stream.read()
-    # if the content of frame is empty
-    # that we need to break the cycle
-    if frame is None:
-        print('No connection')
-        break
+    frame = vs.read()
     # initialization QR-codes from frame
     barcodes = pyzbar.decode(frame)
     for barcode in barcodes:
@@ -55,8 +57,8 @@ while (cv.waitKey(10) != 27):
         # when to add QR-code
         haveRep = False
         # list inside the loop needs to be limited to 5 places
-        if len(latestCode)>=5:
-            del(latestCode[0])
+        if len(latestCode) >= 5:
+            del (latestCode[0])
         # If for any code of the latestCode array there is such a code
         # that it will be equal to the detected code, then break
         for code in latestCode:
@@ -67,12 +69,19 @@ while (cv.waitKey(10) != 27):
         if haveRep is False:
             latestCode.append(barcodeData)
             # take a picture of the code
-            img=frame[y:y+h,x:x+w]
+            img = frame[y:y + h, x:x + w]
             # take a log of the detected code
-            logs={'Detected':f'QR-code:{latestCode[-1]}'}
-            print(latestCode)
-            print(logs)
-    cv.imshow('QR code reader', frame)
+            logs = {'Detected': f'QR-code:{latestCode[-1]}'}
+    return frame
 
-cv.destroyAllWindows()
-stream.stop()
+
+# address = VideoStream('rtsp://admin:AdminNLT!1@192.168.254.18:554/ch1-s1?tcp').start()
+def detection(latestValue):
+    latestCode.append(latestValue)
+    while cv.waitKey(10) != 27:
+        frame = detect()
+        cv.imshow('QR code reader', frame)
+    disconnect()
+
+
+detection('1234')
