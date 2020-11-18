@@ -6,16 +6,16 @@ import datetime
 import imutils
 import time
 
-logs={}
-latestCode = []
+# Initialization parameters
+logs = {}  # dict for logs
+latestCode = []  # list for latest codes
 
+# capture video from camera with class imutils by Adrian Rosebrock
 stream = VideoStream(src=0).start()
 # if stream.grabbed == 0:
 #     logs = {'WARNING': 'No connect'}
 #     print(logs)
 #     stream.stop()
-
-
 
 time.sleep(1)
 cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
@@ -24,45 +24,54 @@ cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
 
 while (cv.waitKey(10) != 27):
 
+    # grab a frame from a video stream
     frame = stream.read()
+    # if the content of frame is empty
+    # that we need to break the cycle
     if frame is None:
         print('No connection')
         break
+    # initialization QR-codes from frame
     barcodes = pyzbar.decode(frame)
     for barcode in barcodes:
-        # extract the bounding box location of the barcode and draw
-        # the bounding box surrounding the barcode on the image
+        # take the coordinate of QR-code
         (x, y, w, h) = barcode.rect
+        # Draw the bounding box
         cv.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        # img = frame[y:y+h,x:x+w]
-        # cv.imwrite('hhh.jpg', img)
 
-        # the barcode data is a bytes object so if we want to draw it
-        # on our output image we need to convert it to a string first
-        barcodeData = barcode.data.decode("utf-8")  #
+        # convert bytes object barcodes into utf-8
+        barcodeData = barcode.data.decode("utf-8")
+        # take a type detected object
         barcodeType = barcode.type
 
-        # draw the barcode data and barcode type on the image
-        text = "{} ({})".format(barcodeData, barcodeType)
+        # draw the barcodeData and barcodeType
+        # text = "{} ({})".format(barcodeData, barcodeType)
+        text = f'{barcodeData} ({barcodeType})'
+
+        # put text on the bounding box
         cv.putText(frame, text, (x, y - 10),
                    cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        # we need boolean function for determine
+        # when to add QR-code
         haveRep = False
+        # list inside the loop needs to be limited to 5 places
         if len(latestCode)>=5:
             del(latestCode[0])
+        # If for any code of the latestCode array there is such a code
+        # that it will be equal to the detected code, then break
         for code in latestCode:
             if code == barcodeData:
                 haveRep = True
                 break
+        # else the code will be added to the array
         if haveRep is False:
             latestCode.append(barcodeData)
+            # take a picture of the code
             img=frame[y:y+h,x:x+w]
+            # take a log of the detected code
             logs={'Detected':f'QR-code:{latestCode[-1]}'}
             print(latestCode)
             print(logs)
-
-        # Если для всех x множества l есть такой barcodeData, что barcodeData != x, то barcodeData + {l}, иначе break
-
-
     cv.imshow('QR code reader', frame)
 
 cv.destroyAllWindows()

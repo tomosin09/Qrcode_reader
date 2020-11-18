@@ -1,3 +1,0 @@
-port=""
-if port == '':
-    print(f'there is {port}')
