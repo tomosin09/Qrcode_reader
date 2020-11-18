@@ -56,9 +56,7 @@ def detect():
         # we need boolean function for determine
         # when to add QR-code
         haveRep = False
-        # list inside the loop needs to be limited to 5 places
-        if len(latestCode) >= 5:
-            del (latestCode[0])
+
         # If for any code of the latestCode array there is such a code
         # that it will be equal to the detected code, then break
         for code in latestCode:
@@ -67,7 +65,11 @@ def detect():
                 break
         # else the code will be added to the array
         if haveRep is False:
+            # list inside the loop needs to be limited to 5 places
+            if len(latestCode) >= 5:
+                del (latestCode[0])
             latestCode.append(barcodeData)
+            print(latestCode)
             # take a picture of the code
             img = frame[y:y + h, x:x + w]
             # take a log of the detected code
@@ -77,11 +79,13 @@ def detect():
 
 # address = VideoStream('rtsp://admin:AdminNLT!1@192.168.254.18:554/ch1-s1?tcp').start()
 def detection(latestValue):
-    latestCode.append(latestValue)
+    for value in latestValue:
+        latestCode.append(value)
+    print(latestCode)
     while cv.waitKey(10) != 27:
         frame = detect()
         cv.imshow('QR code reader', frame)
     disconnect()
 
 
-detection('1234')
+detection(['1234', '3324', '4321', '5678', '8809'])
