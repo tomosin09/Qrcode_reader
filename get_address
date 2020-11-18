@@ -1,0 +1,34 @@
+import os
+connection = False
+
+class address():
+    def __init__(self, ip, port='', login='', password=''):
+        self.ip = ip
+        self.port = port
+        self.login = login
+        self.password = password
+
+    def get_address(self):
+        if self.login !='' or self.password !='':
+            return f'rtsp://{self.login}:{self.password}@{self.ip}?tcp'
+        elif self.port != '':
+            return f'rtsp://{self.ip}:{self.port}?tcp'
+        elif self.port == '' and self.login == '' and self.password == '':
+            return f'rtsp://{self.ip}?tcp'
+        else:
+            return f'rtsp://{self.login}:{self.password}@{self.ip}:{self.port}?tcp'
+
+    def check_address(self):
+        ping = os.system('ping ' + f'{self.ip} > null')
+        if ping == 0:
+            print('Network Active')
+            connection = True
+        else:
+            print('Network Error')
+            connection = False
+        return connection
+
+
+vs = address('178.207.25.10', '123','adminlogin', 'adminpassword')
+print(vs.get_address())
+vs.check_address()
