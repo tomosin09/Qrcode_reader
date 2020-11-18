@@ -1,0 +1,69 @@
+# https://github.com/jrosebr1/imutils
+from imutils.video import VideoStream
+from pyzbar import pyzbar
+import cv2 as cv
+import datetime
+import imutils
+import time
+
+logs={}
+latestCode = []
+
+stream = VideoStream(src=0).start()
+# if stream.grabbed == 0:
+#     logs = {'WARNING': 'No connect'}
+#     print(logs)
+#     stream.stop()
+
+
+
+time.sleep(1)
+cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
+
+# address = VideoStream('rtsp://admin:AdminNLT!1@192.168.254.18:554/ch1-s1?tcp').start()
+
+while (cv.waitKey(10) != 27):
+
+    frame = stream.read()
+    if frame is None:
+        print('No connection')
+        break
+    barcodes = pyzbar.decode(frame)
+    for barcode in barcodes:
+        # extract the bounding box location of the barcode and draw
+        # the bounding box surrounding the barcode on the image
+        (x, y, w, h) = barcode.rect
+        cv.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        # img = frame[y:y+h,x:x+w]
+        # cv.imwrite('hhh.jpg', img)
+
+        # the barcode data is a bytes object so if we want to draw it
+        # on our output image we need to convert it to a string first
+        barcodeData = barcode.data.decode("utf-8")  #
+        barcodeType = barcode.type
+
+        # draw the barcode data and barcode type on the image
+        text = "{} ({})".format(barcodeData, barcodeType)
+        cv.putText(frame, text, (x, y - 10),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        haveRep = False
+        if len(latestCode)>=5:
+            del(latestCode[0])
+        for code in latestCode:
+            if code == barcodeData:
+                haveRep = True
+                break
+        if haveRep is False:
+            latestCode.append(barcodeData)
+            img=frame[y:y+h,x:x+w]
+            logs={'Detected':f'QR-code:{latestCode[-1]}'}
+            print(latestCode)
+            print(logs)
+
+        # Если для всех x множества l есть такой barcodeData, что barcodeData != x, то barcodeData + {l}, иначе break
+
+
+    cv.imshow('QR code reader', frame)
+
+cv.destroyAllWindows()
+stream.stop()
