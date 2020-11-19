@@ -10,13 +10,12 @@ running = True
 logs = dict()
 
 # Function to load stream
-stream = VideoStream('213').start()
+stream = VideoStream(src=0).start()
 if stream.grabbed == 0:
-    log={'ERROR':'Артур мудак!'}
+    log = {'ERROR': 'Артур мудак!'}
     running = False
     raise ConnectionError('No connect')
 time.sleep(1)
-cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
 
 
 # address = VideoStream('rtsp://admin:AdminNLT!1@192.168.254.18:554/ch1-s1?tcp').start()
@@ -24,6 +23,7 @@ def detection(latestValue):
     for value in latestValue:
         latestCode.append(value)
     print(latestCode)
+    retLog = False
     while cv.waitKey(10) != 27:
         # grab a frame from a video stream
         frame = stream.read()
@@ -43,14 +43,6 @@ def detection(latestValue):
             barcodeData = barcode.data.decode("utf-8")
             # take a type detected object
             barcodeType = barcode.type
-
-            # draw the barcodeData and barcodeType
-            # text = "{} ({})".format(barcodeData, barcodeType)
-            text = f'{barcodeData} ({barcodeType})'
-
-            # put text on the bounding box
-            cv.putText(frame, text, (x, y - 10),
-                       cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             # we need boolean function for determine
             # when to add QR-code
             haveRep = False
@@ -67,18 +59,20 @@ def detection(latestValue):
                 if len(latestCode) >= 5:
                     del (latestCode[0])
                 latestCode.append(barcodeData)
+                retLog = True
                 print(latestCode)
                 break
                 # take a picture of the code
                 # img = frame[y:y + h, x:x + w]
                 # take a log of the detected code
-                # logs = {'Detected': f'QR-code:{latestCode[-1]}'}
-        cv.imshow('QR code reader', frame)
+                log = {'Detected': f'QR-code:{latestCode[-1]}'}
+                logs += log
+        if retLog is True:
+            break
     # Function to stop stream
-    print(log)
-    cv.destroyAllWindows()
     stream.stop()
     return latestCode[-1]
 
 
-detection(['1234', '3324', '4321', '5678', '8809'])
+code = detection(['1234', '3324', '4321', '5678', '8809'])
+print(code, logs, running)
