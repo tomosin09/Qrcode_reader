@@ -12,7 +12,8 @@ running = True
 stream = VideoStream(src=0).start()
 if stream.grabbed == 0:
     running = False
-    log = {'Error': 'Can not get stream'}
+    log = {'level': 'Error',
+           'message': 'Can not get stream'}
     raise ConnectionError('No connect')
 time.sleep(1)
 
@@ -27,7 +28,9 @@ def detection(latestValue):
         # grab a frame from a video stream
         frame = stream.read()
         if frame is None:
-            log = {'ERROR': 'No frame'}
+            log = {'level': 'Error',
+                   'message': 'Can not get frame'}
+            running = False
             break
         # initialization QR-codes from frame
         barcodes = pyzbar.decode(frame)
@@ -58,15 +61,15 @@ def detection(latestValue):
                 # take a picture of the code
                 img = frame[y:y + h, x:x + w]
                 # take a log of the detected code
-                log = {'Detected': f'QR-code: {latestCode[-1]}'}
+                log = {'level': 'Detected',
+                       'message': f'QR-code {latestCode[-1]}'}
                 break
 
         if retLog is True:
             break
-    # Function to stop stream
     stream.stop()
-    return latestCode[-1], log, img
+    return img, latestCode[-1], log
 
 
-codes, log, img = detection(['1234', '3324', '4321', '5678', '8809'])
-print(codes, log, img, running)
+img, codes, log = detection(['1234', '3324', '4321', '5678', '8809'])
+print(img, codes, log, running)
