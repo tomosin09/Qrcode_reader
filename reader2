@@ -6,7 +6,7 @@ import time
 
 # Initialization parameters
 latestCode = []  # list for latest codes
-running = True
+
 
 # Function to load stream
 stream = VideoStream(src=0).start()
@@ -15,6 +15,7 @@ if stream.grabbed == 0:
     log = {'level': 'Error',
            'message': 'Can not get stream'}
     raise ConnectionError('No connect')
+running = True
 time.sleep(1)
 
 
@@ -52,11 +53,13 @@ def detection(latestValue):
                     break
             # else the code will be added to the array
             if haveRep is False:
+
                 # list inside the loop needs to be limited to 5 places
                 if len(latestCode) >= 5:
                     del (latestCode[0])
                 latestCode.append(barcodeData)
                 retLog = True
+                running = True
                 print(latestCode)
                 # take a picture of the code
                 img = frame[y:y + h, x:x + w]
@@ -68,8 +71,8 @@ def detection(latestValue):
         if retLog is True:
             break
     stream.stop()
-    return img, latestCode[-1], log
+    return img, latestCode[-1], log, running
 
 
-img, codes, log = detection(['1234', '3324', '4321', '5678', '8809'])
+img, codes, log, running = detection(['1234', '3324', '4321', '5678', '8809'])
 print(img, codes, log, running)
