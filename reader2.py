@@ -9,7 +9,7 @@ latestCode = []  # list for latest codes
 
 
 # Function to load stream
-stream = VideoStream(src=0).start()
+stream = VideoStream('rtsp://admin:AdminNLT!1@192.168.254.18:554/ch1-s1?tcp').start()
 if stream.grabbed == 0:
     running = False
     log = {'level': 'Error',
@@ -24,6 +24,7 @@ def detection(latestValue):
     for value in latestValue:
         latestCode.append(value)
     print(latestCode)
+    # Bool to exit from the loop
     retLog = False
     while cv.waitKey(10) != 27:
         # grab a frame from a video stream
@@ -60,7 +61,6 @@ def detection(latestValue):
                 latestCode.append(barcodeData)
                 retLog = True
                 running = True
-                print(latestCode)
                 # take a picture of the code
                 img = frame[y:y + h, x:x + w]
                 # take a log of the detected code
@@ -71,7 +71,7 @@ def detection(latestValue):
         if retLog is True:
             break
     stream.stop()
-    return img, latestCode[-1], log, running
+    return img, latestCode, log, running
 
 
 img, codes, log, running = detection(['1234', '3324', '4321', '5678', '8809'])
