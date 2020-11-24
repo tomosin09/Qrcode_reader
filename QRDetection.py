@@ -50,11 +50,13 @@ class QRDetection():
         return connection
 
     def detection(self, latestValue):
-        for value in latestValue:
-            self.latestCode.append(value)
+        if len(self.latestCode) == 0:
+            for code in latestValue:
+                self.latestCode.append(code)
         print(self.latestCode)
         # Bool to exit from the loop
         retLog = False
+        cv.namedWindow('QR code reader', cv.WINDOW_NORMAL)
         while cv.waitKey(10) != 27:
             # grab a frame from a video stream
             frame = self.stream.read()
@@ -96,13 +98,14 @@ class QRDetection():
                     log = {'level': 'Detected',
                            'message': f'QR-code {self.latestCode[-1]}'}
                     break
-
+            cv.imshow('QR code reader', frame)
             if retLog is True:
                 break
-        self.stream.stop()
         return img, self.latestCode, log, running
 
 
 vs = QRDetection('192.168.254.18', '554', 'admin', 'AdminNLT!1')
-img, codes, log, running = vs.detection(['1234', '3324', '4321', '5678', '8809'])
-print(img, codes, log, running)
+while 1:
+    img, codes, log, running = vs.detection(['1234', '3324', '4321', '5678', '8809'])
+    time.sleep(1)
+    print(img, codes, log, running)
