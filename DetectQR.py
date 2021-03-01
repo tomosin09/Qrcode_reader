@@ -6,7 +6,7 @@ import time
 from Config import ConfigGetter
 
 
-# Основной класс по распознаванию QR-кода
+# Class to detect QR
 class Detect:
     def __init__(self):
         super().__init__()
@@ -17,8 +17,7 @@ class Detect:
         self.password = cfg.cameraPassword
         self.port = cfg.cameraArguments
 
-    # Установка соединения с камерой
-    # Вызывается один раз - при инициализации
+    # Set connect with camera
     def connect(self):
         # Function to load stream
         # address = f'rtsp://{self.login}:{self.password}@{self.ip}:{self.port}?tcp'
@@ -31,12 +30,12 @@ class Detect:
             log = {'level': 'INFO', 'message': 'Подключение с камерой установлено. Ожидание QR-кода...'}
         return running, log
 
-    # Вызывается при ошибке в 'detection' или извне
-    # Отключение соединения с камерой
+    # Called on error in 'detection' or from outside
+    # Disconnecting the camera connection
     def disconnect(self):
         pass
 
-    # Основной код, который будет постоянно вызываться
+    # The main code to be called constantly
     def detection(self, latestValue):
         if len(self.latestCode) == 0:
             for code in latestValue:
