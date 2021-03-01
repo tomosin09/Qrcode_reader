@@ -1,4 +1,3 @@
-# Основные импорты
 import cv2 as cv
 from imutils.video import VideoStream
 from pyzbar.pyzbar import decode
